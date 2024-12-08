@@ -53,20 +53,47 @@ class Player(pygame.sprite.Sprite):
         self.draw_arm = self.tank_arm
         self.draw_arm_rectangle = self.arm_rect
         self.arm_angle = 0
-        self.bullet_group = pygame.sprite.Group
+        self.bullet_group = []
 
     def draw(self, surface):
         surface.blit(self.draw_body, self.draw_body_rectangle)
         surface.blit(self.draw_arm, self.draw_arm_rectangle)
+        for bullet in self.bullet_group:
+            bullet.draw(surface)
 
     def update(self, pressed):
+        # want to use match - case here but need to learn more about pressed first
         if pressed[K_RIGHT] and self.arm_angle > -90:
             self.arm_angle -= 1
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         if pressed[K_LEFT] and self.arm_angle < 90:
             self.arm_angle += 1
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
+        if pressed[K_SPACE]:
+            self.bullet_group.append(Bullet(self.arm_angle, self.arm_rect.center))
         self.draw_arm_rectangle = self.draw_arm.get_rect(center=self.arm_rect.center)
+        for bullet in self.bullet_group:
+            bullet.update()
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, angle, arm_center):
+        super().__init__()
+        self.collision = False
+        self.bullet = pygame.image.load("resources/images/bullet.png")
+        self.bullet_rect = self.bullet.get_rect(center=arm_center)
+        self.angle = angle
+        x, y = arm_center
+        self.delta_x = sin(angle)
+        self.delta_y = cos(angle)
+        self.bullet = pygame.transform.rotate(self.bullet, self.angle)
+        self.bullet_rect.move_ip(40*self.delta_x, -40*self.delta_y)
+
+    def draw(self, surface):
+        surface.blit(self.bullet, self.bullet_rect)
+
+    def update(self):
+        self.bullet_rect.move_ip(4*self.delta_x, -4*self.delta_y)
 
 
 _game = Game(720, 260)
