@@ -1,3 +1,5 @@
+import math
+
 import pygame
 from pygame.locals import *
 import os
@@ -84,8 +86,8 @@ class Bullet(pygame.sprite.Sprite):
         self.bullet_rect = self.bullet.get_rect(center=arm_center)
         self.angle = angle
         x, y = arm_center
-        self.delta_x = sin(angle)
-        self.delta_y = cos(angle)
+        self.delta_x = sin(math.radians(-angle))
+        self.delta_y = cos(math.radians(-angle))
         self.bullet = pygame.transform.rotate(self.bullet, self.angle)
         self.bullet_rect.move_ip(40*self.delta_x, -40*self.delta_y)
 
