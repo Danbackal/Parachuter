@@ -55,13 +55,14 @@ class Player(pygame.sprite.Sprite):
         self.draw_arm = self.tank_arm
         self.draw_arm_rectangle = self.arm_rect
         self.arm_angle = 0
-        self.bullet_group = []
+        self.bullet_group = pygame.sprite.Group()
 
     def draw(self, surface):
         surface.blit(self.draw_body, self.draw_body_rectangle)
         surface.blit(self.draw_arm, self.draw_arm_rectangle)
-        for bullet in self.bullet_group:
-            bullet.draw(surface)
+        # for bullet in self.bullet_group:
+        #     bullet.draw(surface)
+        self.bullet_group.draw(surface)
 
     def update(self, pressed):
         # want to use match - case here but need to learn more about pressed first
@@ -72,30 +73,34 @@ class Player(pygame.sprite.Sprite):
             self.arm_angle += 1
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         if pressed[K_SPACE]:
-            self.bullet_group.append(Bullet(self.arm_angle, self.arm_rect.center))
+            bullet = Bullet(self.arm_angle, self.arm_rect.center)
+            self.bullet_group.add(bullet)
         self.draw_arm_rectangle = self.draw_arm.get_rect(center=self.arm_rect.center)
-        for bullet in self.bullet_group:
-            bullet.update()
+        # for bullet in self.bullet_group:
+        #     bullet.update()
+        self.bullet_group.update()
 
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, angle, arm_center):
         super().__init__()
         self.collision = False
-        self.bullet = pygame.image.load("resources/images/bullet.png")
-        self.bullet_rect = self.bullet.get_rect(center=arm_center)
+        self.image = pygame.image.load("resources/images/bullet.png")
+        self.rect = self.image.get_rect(center=arm_center)
         self.angle = angle
         x, y = arm_center
         self.delta_x = sin(math.radians(-angle))
         self.delta_y = cos(math.radians(-angle))
-        self.bullet = pygame.transform.rotate(self.bullet, self.angle)
-        self.bullet_rect.move_ip(40*self.delta_x, -40*self.delta_y)
+        self.image = pygame.transform.rotate(self.image, self.angle)
+        self.rect.move_ip(40*self.delta_x, -40*self.delta_y)
 
     def draw(self, surface):
-        surface.blit(self.bullet, self.bullet_rect)
+        surface.blit(self.image, self.rect)
 
     def update(self):
-        self.bullet_rect.move_ip(4*self.delta_x, -4*self.delta_y)
+        self.rect.move_ip(4*self.delta_x, -4*self.delta_y)
+        if self.rect.top < 0 or self.rect.left < 0 or self.rect.right > 720:
+            self.kill()
 
 
 _game = Game(720, 260)
