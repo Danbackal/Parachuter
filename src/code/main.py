@@ -58,6 +58,7 @@ class Game(pygame.sprite.Sprite):
                 self.enemy_group.add(Enemy(randint(0, SCREEN_WIDTH)))
             self.enemy_group.update()
             self.enemy_timer -= 1
+            pygame.sprite.groupcollide(self.bullet_group, self.enemy_group, True, True)
 
 
 class Player(pygame.sprite.Sprite):
