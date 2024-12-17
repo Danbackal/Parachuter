@@ -1,0 +1,4 @@
+# for now, ignore idea
+.idea
+
+src/code/__pycache__/
