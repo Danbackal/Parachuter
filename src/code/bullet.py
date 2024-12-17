@@ -13,7 +13,7 @@ class Bullet(pygame.sprite.Sprite):
         self.delta_x = sin(radians(-angle))
         self.delta_y = cos(radians(-angle))
         self.image = pygame.transform.rotate(self.image, self.angle)
-        self.rect.move_ip(40*self.delta_x, -40*self.delta_y)
+        self.rect.move_ip(35*self.delta_x, -35*self.delta_y)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

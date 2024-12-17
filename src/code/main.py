@@ -20,6 +20,9 @@ class Game(pygame.sprite.Sprite):
         self._game_fps = 60
         self.GAME_STATE = self._game_start
         self.ground = pygame.Rect(0, 830, self._game_width, 130)
+        self.pause_menu_background = pygame.Surface((self._game_width, self._game_height))
+        self.pause_menu_background.set_alpha(135)
+        self.pause_menu_background.fill("grey")
         self.paused = False
         self.player = Player(self)
         self.enemy_group = pygame.sprite.Group()
@@ -30,6 +33,18 @@ class Game(pygame.sprite.Sprite):
         pygame.draw.rect(surface, "green", self.ground)
         self.player.draw(surface)
         self.enemy_group.draw(surface)
+        # Based on game state - draw surfaces overtop the above
+        match self.GAME_STATE:
+            case self._game_start:
+                # Want a brighter start and end game background
+                # surface.blit(self.menu_background, (0, 0))
+                print("start draw")
+            case self._game_paused:
+                surface.blit(self.pause_menu_background, (0, 0))
+                print("pause draw")
+            case self._game_end:
+                # surface.blit(self.menu_background, (0, 0))
+                print("end draw")
 
     def update(self):
         # GAME STATE OPTIONS:
