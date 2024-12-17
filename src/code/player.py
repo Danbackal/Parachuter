@@ -20,8 +20,8 @@ class Player(pygame.sprite.Sprite):
         self.bullet_timer = 0
 
     def draw(self, surface):
-        surface.blit(self.draw_body, self.draw_body_rectangle)
         surface.blit(self.draw_arm, self.draw_arm_rectangle)
+        surface.blit(self.draw_body, self.draw_body_rectangle)
         self.bullet_group.draw(surface)
 
     def update(self, pressed):

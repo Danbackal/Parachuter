@@ -1,10 +1,6 @@
-import math
-
 import pygame
 from pygame.locals import *
 import os
-from math import sin, cos
-from random import randint
 
 from player import Player
 from enemy import Enemy
