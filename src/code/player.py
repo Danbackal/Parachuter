@@ -2,6 +2,7 @@ from bullet import Bullet
 import pygame
 from pygame.locals import *
 
+
 class Player(pygame.sprite.Sprite):
     # Owns the player tank, as well as the bullets shot from the tank
     def __init__(self, game):

@@ -1,6 +1,7 @@
 import pygame
 from math import sin, cos, radians
 
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, angle, arm_center):
         super().__init__()
@@ -19,6 +20,6 @@ class Bullet(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
 
     def update(self):
-        self.rect.move_ip(4*self.delta_x, -4*self.delta_y)
+        self.rect.move_ip(5*self.delta_x, -5*self.delta_y)
         if self.rect.top < 0 or self.rect.left < 0 or self.rect.right > 720:
             self.kill()

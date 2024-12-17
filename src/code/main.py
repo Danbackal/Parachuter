@@ -52,7 +52,6 @@ class Game(pygame.sprite.Sprite):
             case self._game_end:
                 self.restart_button.draw(surface)
                 self.quit_button.draw(surface)
-                print("end draw")
 
     def update(self):
         # GAME STATE OPTIONS:
@@ -68,7 +67,8 @@ class Game(pygame.sprite.Sprite):
                     pygame.mouse.set_visible(True)
                     self.start_button.set_center(self._game_width / 2, self._game_height / 2)
                     self.state_change = False
-                if pygame.mouse.get_pressed():
+                mouseclick = pygame.mouse.get_pressed()
+                if mouseclick[0]:
                     if self.start_button.check_click(pygame.mouse.get_pos()):
                         self.GAME_STATE = self._game_running
                         self.state_change = True
@@ -81,7 +81,7 @@ class Game(pygame.sprite.Sprite):
                     self.GAME_STATE = self._game_paused
                     self.state_change = True
                 self.player.update(pressed_keys)
-                #need proper enemy factory but rn just want consistency for testing
+                # need proper enemy factory but rn just want consistency for testing
                 if self.enemy_timer == 0:
                     self.enemy_timer = 100
                     self.enemy_group.add(Enemy(self))
@@ -95,7 +95,8 @@ class Game(pygame.sprite.Sprite):
                     self.restart_button.set_center(self._game_width / 2, self._game_height / 2)
                     self.quit_button.set_center(self._game_width / 2, self._game_height / 2 + 95)
                     self.state_change = False
-                if pygame.mouse.get_pressed():
+                mouseclick = pygame.mouse.get_pressed()
+                if mouseclick[0]:
                     if self.resume_button.check_click(pygame.mouse.get_pos()):
                         self.GAME_STATE = self._game_running
                         self.state_change = True
@@ -112,7 +113,8 @@ class Game(pygame.sprite.Sprite):
                     self.restart_button.set_center(self._game_width / 2, self._game_height / 2 - 60)
                     self.quit_button.set_center(self._game_width / 2, self._game_height / 2 + 60)
                     self.state_change = False
-                if pygame.mouse.get_pressed():
+                mouseclick = pygame.mouse.get_pressed()
+                if mouseclick[0]:
                     if self.restart_button.check_click(pygame.mouse.get_pos()):
                         self.GAME_STATE = self._game_start
                         self.state_change = True
@@ -134,6 +136,7 @@ class Game(pygame.sprite.Sprite):
 
     def set_game_end(self):
         self.GAME_STATE = self._game_end
+        self.state_change = True
 
     def get_ground_rect(self):
         return self.ground
