@@ -21,7 +21,7 @@ os.chdir(current_work_dir)
 
 
 class Game(pygame.sprite.Sprite):
-    # Needed just for collisions with parachuters
+    # Owns the game and game state
     def __init__(self, width, height):
         super().__init__()
         self.ground = pygame.Surface([width, height])
@@ -29,15 +29,12 @@ class Game(pygame.sprite.Sprite):
         self.rect = self.ground.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT))
         self.paused = False
         self.player = Player()
-        self.bullet_group = pygame.sprite.Group()
         self.enemy_group = pygame.sprite.Group()
-        self.bullet_timer = 0
         self.enemy_timer = 0
 
     def draw(self, surface):
         surface.blit(self.ground, self.rect)
         self.player.draw(surface)
-        self.bullet_group.draw(surface)
         self.enemy_group.draw(surface)
 
     def update(self):
@@ -45,12 +42,7 @@ class Game(pygame.sprite.Sprite):
         if pressed_keys[K_p]:
             self.paused = not self.paused
         if not self.paused:
-            if pressed_keys[K_SPACE] and self.bullet_timer <= 0:
-                self.bullet_group.add(self.player.shoot_bullet())
-                self.bullet_timer = 20
             self.player.update(pressed_keys)
-            self.bullet_group.update()
-            self.bullet_timer -= 1
 
             #need proper enemy factory but rn just want consistency for testing
             if self.enemy_timer == 0:
@@ -58,14 +50,13 @@ class Game(pygame.sprite.Sprite):
                 self.enemy_group.add(Enemy(randint(0, SCREEN_WIDTH)))
             self.enemy_group.update()
             self.enemy_timer -= 1
-            pygame.sprite.groupcollide(self.bullet_group, self.enemy_group, True, True)
+
+    def get_enemy_group(self):
+        return self.enemy_group
 
 
 class Player(pygame.sprite.Sprite):
-    # this builds the player object
-    # the player object holds the firing mechanism, listens to the game
-    # for input, and tells the game the angle of the rod when it fires?
-    # Like a getBulletPath function or something
+    # Owns the player tank, as well as the bullets shot from the tank
     def __init__(self):
         super().__init__()
         self.tank_body = pygame.image.load("resources/images/tank_body.png")
@@ -78,10 +69,12 @@ class Player(pygame.sprite.Sprite):
         self.draw_arm_rectangle = self.arm_rect
         self.arm_angle = 0
         self.bullet_group = pygame.sprite.Group()
+        self.bullet_timer = 0
 
     def draw(self, surface):
         surface.blit(self.draw_body, self.draw_body_rectangle)
         surface.blit(self.draw_arm, self.draw_arm_rectangle)
+        self.bullet_group.draw(surface)
 
     def update(self, pressed):
         # want to use match - case here but need to learn more about pressed first
@@ -92,6 +85,12 @@ class Player(pygame.sprite.Sprite):
             self.arm_angle += 1
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         self.draw_arm_rectangle = self.draw_arm.get_rect(center=self.arm_rect.center)
+        if pressed[K_SPACE] and self.bullet_timer <= 0:
+            self.bullet_group.add(Bullet(self.arm_angle, self.arm_rect.center))
+            self.bullet_timer = 20
+        self.bullet_group.update()
+        self.bullet_timer -= 1
+        pygame.sprite.groupcollide(self.bullet_group, _game.get_enemy_group(), True, True)
 
     def shoot_bullet(self) -> pygame.sprite.Sprite:
         return Bullet(self.arm_angle, self.arm_rect.center)
@@ -136,6 +135,9 @@ class Enemy(pygame.sprite.Sprite):
 _game = Game(720, 260)
 
 # Game Loop
+# To Add:
+# Game State - start, running, paused, finished, and closed. Closed will end the game loop
+# Game menu - start menu, pause menu (resume, quit, or restart), finish menu (quit or restart)
 while game:
     for event in pygame.event.get():
         if event.type == QUIT:
