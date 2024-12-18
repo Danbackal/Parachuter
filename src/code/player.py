@@ -28,15 +28,15 @@ class Player(pygame.sprite.Sprite):
     def update(self, pressed):
         # want to use match - case here but need to learn more about pressed first
         if pressed[K_RIGHT] and self.arm_angle > -90:
-            self.arm_angle -= 1
+            self.arm_angle -= 1.5
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         if pressed[K_LEFT] and self.arm_angle < 90:
-            self.arm_angle += 1
+            self.arm_angle += 1.5
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         self.draw_arm_rectangle = self.draw_arm.get_rect(center=self.arm_rect.center)
         if pressed[K_SPACE] and self.bullet_timer <= 0:
             self.bullet_group.add(Bullet(self.arm_angle, self.arm_rect.center))
-            self.bullet_timer = 20
+            self.bullet_timer = 15
         self.bullet_group.update()
         self.bullet_timer -= 1
         if pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True):

@@ -44,8 +44,8 @@ class Game(pygame.sprite.Sprite):
         # surface.blit(self.ground, self.rect)
         pygame.draw.rect(surface, "green", self.ground)
         self.player.draw(surface)
-        surface.blit(self.scoreboard, self.scoreboard_rect)
         self.enemy_group.draw(surface)
+        surface.blit(self.scoreboard, self.scoreboard_rect)
         # Based on game state - draw surfaces overtop the above
         match self.GAME_STATE:
             case self._game_start:
