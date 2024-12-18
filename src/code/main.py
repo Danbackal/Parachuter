@@ -26,6 +26,10 @@ class Game(pygame.sprite.Sprite):
         self.restart_button = Button(self, "restart")
         self.quit_button = Button(self, "quit")
         self.state_change = False
+        self.score_font = pygame.font.Font(None, 32)
+        self.score = 0
+        self.scoreboard = self.score_font.render("Score: {}".format(str(self.score)), True, "black")
+        self.scoreboard_rect = self.scoreboard.get_rect(topleft=(600, 20))
         self.ground = pygame.Rect(0, 830, self._game_width, 130)
         self.pause_menu_background = pygame.Surface((self._game_width, self._game_height))
         self.pause_menu_background.set_alpha(135)
@@ -39,6 +43,7 @@ class Game(pygame.sprite.Sprite):
         # surface.blit(self.ground, self.rect)
         pygame.draw.rect(surface, "green", self.ground)
         self.player.draw(surface)
+        surface.blit(self.scoreboard, self.scoreboard_rect)
         self.enemy_group.draw(surface)
         # Based on game state - draw surfaces overtop the above
         match self.GAME_STATE:
@@ -101,8 +106,7 @@ class Game(pygame.sprite.Sprite):
                         self.GAME_STATE = self._game_running
                         self.state_change = True
                     if self.restart_button.check_click(pygame.mouse.get_pos()):
-                        self.GAME_STATE = self._game_start
-                        self.state_change = True
+                        self.reset_game()
                     if self.quit_button.check_click(pygame.mouse.get_pos()):
                         self.GAME_STATE = self._game_close
                         self.state_change = True
@@ -116,8 +120,7 @@ class Game(pygame.sprite.Sprite):
                 mouseclick = pygame.mouse.get_pressed()
                 if mouseclick[0]:
                     if self.restart_button.check_click(pygame.mouse.get_pos()):
-                        self.GAME_STATE = self._game_start
-                        self.state_change = True
+                        self.reset_game()
                     if self.quit_button.check_click(pygame.mouse.get_pos()):
                         self.GAME_STATE = self._game_close
                         self.state_change = True
@@ -125,11 +128,26 @@ class Game(pygame.sprite.Sprite):
             case self._game_close:
                 print("Game State set to Close")
 
+    def update_scoreboard(self, case):
+        if case == "hit":
+            self.score += 1
+        elif case == "reset":
+            self.score = 0
+        self.scoreboard = self.score_font.render("Score: {}".format(str(self.score)), True, "black")
+        self.scoreboard_rect = self.scoreboard.get_rect(topleft=(600, 20))
+
     def get_enemy_group(self):
         return self.enemy_group
 
     def get_game_state(self):
         return self.GAME_STATE
+
+    def reset_game(self):
+        self.GAME_STATE = self._game_start
+        self.enemy_group.empty()
+        self.player.reset_game()
+        self.update_scoreboard("reset")
+        self.state_change = True
 
     def set_game_close(self):
         self.GAME_STATE = self._game_close
@@ -162,6 +180,7 @@ SCREEN_WIDTH = 720
 SCREEN_HEIGHT = 960
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Parachuter")
 clock = pygame.time.Clock()
 _game = Game(SCREEN_WIDTH, SCREEN_HEIGHT)
 

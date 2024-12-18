@@ -39,7 +39,15 @@ class Player(pygame.sprite.Sprite):
             self.bullet_timer = 20
         self.bullet_group.update()
         self.bullet_timer -= 1
-        pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True)
+        if pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True):
+            self.game.update_scoreboard("hit")
 
     def shoot_bullet(self) -> pygame.sprite.Sprite:
         return Bullet(self.arm_angle, self.arm_rect.center)
+
+    def reset_game(self):
+        self.bullet_group.empty()
+        self.arm_angle = 0
+        # self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
+        self.draw_arm = self.tank_arm
+        self.draw_arm_rectangle = self.arm_rect
