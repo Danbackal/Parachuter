@@ -38,6 +38,7 @@ class Game(pygame.sprite.Sprite):
         self.player = Player(self)
         self.enemy_group = pygame.sprite.Group()
         self.enemy_timer = 0
+        self.enemy_rate = 1
 
     def draw(self, surface):
         # surface.blit(self.ground, self.rect)
@@ -87,8 +88,9 @@ class Game(pygame.sprite.Sprite):
                     self.state_change = True
                 self.player.update(pressed_keys)
                 # need proper enemy factory but rn just want consistency for testing
-                if self.enemy_timer == 0:
-                    self.enemy_timer = 100
+                if self.enemy_timer <= 0:
+                    self.enemy_timer = 500/self.enemy_rate
+                    self.enemy_rate += 0.5
                     self.enemy_group.add(Enemy(self))
                 self.enemy_group.update()
                 self.enemy_timer -= 1
@@ -147,6 +149,7 @@ class Game(pygame.sprite.Sprite):
         self.enemy_group.empty()
         self.player.reset_game()
         self.update_scoreboard("reset")
+        self.enemy_rate = 1
         self.state_change = True
 
     def set_game_close(self):
