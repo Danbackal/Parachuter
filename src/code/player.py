@@ -39,11 +39,13 @@ class Player(pygame.sprite.Sprite):
             self.bullet_timer = 15
         self.bullet_group.update()
         self.bullet_timer -= 1
-        if pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True):
+        # mask instead of rectangle collision for better hit marks. In bigger games,
+        # can do rectangle without dokill first. This is less intensive. If rectangle collision,
+        # check for mask collision.
+        # That might need to be done in the update function of the bullet though, and not in the player
+        # Worth considering a redesign where all classes have access to the game, and game functions, directly
+        if pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True, pygame.sprite.collide_mask):
             self.game.update_scoreboard("hit")
-
-    def shoot_bullet(self) -> pygame.sprite.Sprite:
-        return Bullet(self.arm_angle, self.arm_rect.center)
 
     def reset_game(self):
         self.bullet_group.empty()

@@ -9,6 +9,7 @@ class Enemy(pygame.sprite.Sprite):
         self.game = game
         self.image = pygame.image.load("resources/images/soldier.png")
         self.rect = self.image.get_rect(center=(randint(0, self.game.game_width()), -40))
+        self.mask = pygame.mask.from_surface(self.image)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

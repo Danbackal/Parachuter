@@ -11,10 +11,11 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=arm_center)
         self.angle = angle
         x, y = arm_center
-        self.delta_x = sin(radians(-angle))
-        self.delta_y = cos(radians(-angle))
+        self.delta_x = sin(radians(-self.angle))
+        self.delta_y = cos(radians(-self.angle))
         self.image = pygame.transform.rotate(self.image, self.angle)
         self.rect.move_ip(35*self.delta_x, -35*self.delta_y)
+        self.mask = pygame.mask.from_surface(self.image)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
