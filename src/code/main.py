@@ -11,6 +11,8 @@ class Game(pygame.sprite.Sprite):
     # Owns the game and game state
     def __init__(self, width, height):
         super().__init__()
+
+        # Game Details
         self._game_start = 1
         self._game_running = 2
         self._game_paused = 3
@@ -20,33 +22,47 @@ class Game(pygame.sprite.Sprite):
         self._game_height = height
         self._game_fps = 60
         self.GAME_STATE = self._game_start
+        self.ground = pygame.Rect(0, 830, self._game_width, 130)
+        self.paused = False
+
+        # Button Set Up
         self.start_button = Button(self, "start")
         self.start_button.set_center(self._game_width/2, self._game_height/2)
         self.resume_button = Button(self, "resume")
         self.restart_button = Button(self, "restart")
         self.quit_button = Button(self, "quit")
         self.state_change = False
-        self.score_font = pygame.font.Font(None, 32)
-        self.score = 0
-        self.scoreboard = self.score_font.render("Score: {}".format(str(self.score)), True, "black")
-        self.scoreboard_rect = self.scoreboard.get_rect(topleft=(600, 20))
-        self.ground = pygame.Rect(0, 830, self._game_width, 130)
         self.pause_menu_background = pygame.Surface((self._game_width, self._game_height))
         self.pause_menu_background.set_alpha(135)
         self.pause_menu_background.fill("grey")
-        self.paused = False
+
+        # Header Set Up
+        self.main_font = pygame.font.Font(None, 32)
+        self.score = 0
+        self.level = 1
+        self.score_location = (600, 10)
+        self.level_location = (600, 35)
+        self.scoreboard = self.main_font.render("Score: {}".format(str(self.score)), True, "black")
+        self.scoreboard_rect = self.scoreboard.get_rect(topleft=self.score_location)
+        self.level_board = self.main_font.render("Level: {}".format(str(self.level)), True, "black")
+        self.level_rect = self.level_board.get_rect(topleft=self.level_location)
+        self.header = pygame.Rect(0, 0, self._game_width, 60)
+
+        # Game Pieces
         self.player = Player(self)
         self.enemy_group = pygame.sprite.Group()
         self.enemy_timer = 0
-        self.level = 1
         self.enemy_rate = 1
 
+    # TODO: Break up draw function into parts of screen
     def draw(self, surface):
         # surface.blit(self.ground, self.rect)
         pygame.draw.rect(surface, "green", self.ground)
         self.player.draw(surface)
         self.enemy_group.draw(surface)
+        pygame.draw.rect(surface, "grey", self.header)
         surface.blit(self.scoreboard, self.scoreboard_rect)
+        surface.blit(self.level_board, self.level_rect)
         # Based on game state - draw surfaces overtop the above
         match self.GAME_STATE:
             case self._game_start:
@@ -165,8 +181,8 @@ class Game(pygame.sprite.Sprite):
             self.score += 1
         elif case == "reset":
             self.score = 0
-        self.scoreboard = self.score_font.render("Score: {}".format(str(self.score)), True, "black")
-        self.scoreboard_rect = self.scoreboard.get_rect(topleft=(600, 20))
+        self.scoreboard = self.main_font.render("Score: {}".format(str(self.score)), True, "black")
+        self.scoreboard_rect = self.scoreboard.get_rect(topleft=self.score_location)
 
     def get_enemy_group(self):
         return self.enemy_group
