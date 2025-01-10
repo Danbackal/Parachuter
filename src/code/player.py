@@ -5,9 +5,10 @@ from pygame.locals import *
 
 class Player(pygame.sprite.Sprite):
     # Owns the player tank, as well as the bullets shot from the tank
-    def __init__(self, game):
+    def __init__(self, game, font):
         super().__init__()
         self.game = game
+        self.font = font
         self.tank_body = pygame.image.load("resources/images/tank_body.png")
         self.body_rect = self.tank_body.get_rect(center=(self.game.game_width()/2, 820))
         self.draw_body = self.tank_body
@@ -19,11 +20,21 @@ class Player(pygame.sprite.Sprite):
         self.arm_angle = 0
         self.bullet_group = pygame.sprite.Group()
         self.bullet_timer = 0
+        self.bullets = 100
+        self.bullet_location = (20, 10)
+        self.bullet_board = self.font.render("Bullets: {}".format(str(self.bullets)), True, "black")
+        self.bullet_rect = self.bullet_board.get_rect(topleft=self.bullet_location)
+        self.shot = 0
+        self.reload = 1
+        self.reset = 2
 
     def draw(self, surface):
         surface.blit(self.draw_arm, self.draw_arm_rectangle)
         surface.blit(self.draw_body, self.draw_body_rectangle)
         self.bullet_group.draw(surface)
+
+    def draw_bullet_count(self, surface):
+        surface.blit(self.bullet_board, self.bullet_rect)
 
     def update(self, pressed):
         # want to use match - case here but need to learn more about pressed first
@@ -34,7 +45,8 @@ class Player(pygame.sprite.Sprite):
             self.arm_angle += 1.5
             self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         self.draw_arm_rectangle = self.draw_arm.get_rect(center=self.arm_rect.center)
-        if pressed[K_SPACE] and self.bullet_timer <= 0:
+        if pressed[K_SPACE] and self.bullet_timer <= 0 < self.bullets:
+            self.update_bullet_count(self.shot)
             self.bullet_group.add(Bullet(self.arm_angle, self.arm_rect.center))
             self.bullet_timer = 15
         self.bullet_group.update()
@@ -47,9 +59,21 @@ class Player(pygame.sprite.Sprite):
         if pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True, pygame.sprite.collide_mask):
             self.game.update_scoreboard(0)
 
+    def update_bullet_count(self, update):
+        match update:
+            case self.shot:
+                self.bullets -= 1
+            case self.reload:
+                self.bullets += 100
+            case self.reset:
+                self.bullets = 100
+        self.bullet_board = self.font.render("Bullets: {}".format(str(self.bullets)), True, "black")
+        self.bullet_rect = self.bullet_board.get_rect(topleft=self.bullet_location)
+
     def reset_game(self):
         self.bullet_group.empty()
         self.arm_angle = 0
         # self.draw_arm = pygame.transform.rotate(self.tank_arm, self.arm_angle)
         self.draw_arm = self.tank_arm
         self.draw_arm_rectangle = self.arm_rect
+        self.update_bullet_count(self.reset)

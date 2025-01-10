@@ -39,17 +39,17 @@ class Game(pygame.sprite.Sprite):
         # Header Set Up
         self.main_font = pygame.font.Font(None, 32)
         self.score = 0
-        self.level = 1
         self.score_location = (600, 10)
-        self.level_location = (600, 35)
         self.scoreboard = self.main_font.render("Score: {}".format(str(self.score)), True, "black")
         self.scoreboard_rect = self.scoreboard.get_rect(topleft=self.score_location)
+        self.level = 1
+        self.level_location = (600, 35)
         self.level_board = self.main_font.render("Level: {}".format(str(self.level)), True, "black")
         self.level_rect = self.level_board.get_rect(topleft=self.level_location)
         self.header = pygame.Rect(0, 0, self._game_width, 60)
 
         # Game Pieces
-        self.player = Player(self)
+        self.player = Player(self, self.main_font)
         self.enemy_group = pygame.sprite.Group()
         self.enemy_timer = 0
         self.enemy_rate = 1
@@ -63,6 +63,7 @@ class Game(pygame.sprite.Sprite):
         pygame.draw.rect(surface, "grey", self.header)
         surface.blit(self.scoreboard, self.scoreboard_rect)
         surface.blit(self.level_board, self.level_rect)
+        self.player.draw_bullet_count(surface)
         # Based on game state - draw surfaces overtop the above
         match self.GAME_STATE:
             case self._game_start:
