@@ -151,7 +151,7 @@ class Game(pygame.sprite.Sprite):
                 # need proper enemy factory but rn just want consistency for testing
                 if self.score >= self.level * (10 + self.level):
                     self.enemy_rate += 0.5
-                    self.level += 1
+                    self.update_level(0)
                 if self.enemy_timer <= 0:
                     self.enemy_timer = 250 / self.enemy_rate
                     self.enemy_group.add(Enemy(self))
@@ -177,12 +177,20 @@ class Game(pygame.sprite.Sprite):
                 print("Game State set to Close")
 
     def update_scoreboard(self, case):
-        if case == "hit":
+        if case == 0:
             self.score += 1
-        elif case == "reset":
+        elif case == 1:
             self.score = 0
         self.scoreboard = self.main_font.render("Score: {}".format(str(self.score)), True, "black")
         self.scoreboard_rect = self.scoreboard.get_rect(topleft=self.score_location)
+
+    def update_level(self, case):
+        if case == 0:
+            self.level += 1
+        elif case == 1:
+            self.level = 1
+        self.level_board = self.main_font.render("Level: {}".format(str(self.level)), True, "black")
+        self.level_rect = self.level_board.get_rect(topleft=self.level_location)
 
     def get_enemy_group(self):
         return self.enemy_group
@@ -194,9 +202,9 @@ class Game(pygame.sprite.Sprite):
         self.GAME_STATE = self._game_start
         self.enemy_group.empty()
         self.player.reset_game()
-        self.update_scoreboard("reset")
+        self.update_scoreboard(1)
         self.enemy_rate = 1
-        self.level = 1
+        self.update_level(1)
         self.state_change = True
 
     def set_game_close(self):
