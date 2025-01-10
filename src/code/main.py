@@ -67,6 +67,50 @@ class Game(pygame.sprite.Sprite):
         # PAUSE - pause menu. Can unpause, restart, or quit. Restart will either set back to START or just reset values
         # END - end game. Can restart or close.
         # CLOSE - closes the game
+
+        # We only want to check for mouse clicks if the game is in a menu state.
+        # Non-menu, we poll for key presses.
+        # Always check for QUIT
+        # if menu, check for mouse click
+        # else, check get pressed
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                self.set_game_close()
+            elif self.GAME_STATE in [self._game_start, self._game_paused, self._game_end]:
+                if event.type == MOUSEBUTTONDOWN:
+                    # check where it clicks
+                    mouse_click = pygame.mouse.get_pressed()
+                    if mouse_click[0]:
+                        mouse_pos = pygame.mouse.get_pos()
+                        # check positions of buttons, will require game stating
+                        match self.GAME_STATE:
+                            case self._game_start:
+                                if self.start_button.check_click(mouse_pos):
+                                    self.GAME_STATE = self._game_running
+                                    self.state_change = True
+                            case self._game_paused:
+                                if self.resume_button.check_click(mouse_pos):
+                                    self.GAME_STATE = self._game_running
+                                    self.state_change = True
+                                if self.restart_button.check_click(mouse_pos):
+                                    self.reset_game()
+                                if self.quit_button.check_click(mouse_pos):
+                                    self.GAME_STATE = self._game_close
+                                    self.state_change = True
+                                # TODO: add upgrade button clicks.
+                                # Will maybe need a method or class for upgrades:
+                                # Can display all at once, show newer versions and unlocks
+                                # Possibly a whole separate menu in the pause menu options
+                            case self._game_end:
+                                if self.restart_button.check_click(pygame.mouse.get_pos()):
+                                    self.reset_game()
+                                if self.quit_button.check_click(pygame.mouse.get_pos()):
+                                    self.GAME_STATE = self._game_close
+                                    self.state_change = True
+                            # Want to keep _game_running outside this loop - have to hold down cannon, and
+                            # don't want to have to press for every bullet (although, game design wise,
+                            # by adding in proper event triggers and bullet counts, that could be interesting)
+
         pressed_keys = pygame.key.get_pressed()
         match self.GAME_STATE:
             case self._game_start:
@@ -74,22 +118,22 @@ class Game(pygame.sprite.Sprite):
                     pygame.mouse.set_visible(True)
                     self.start_button.set_center(self._game_width / 2, self._game_height / 2)
                     self.state_change = False
-                mouseclick = pygame.mouse.get_pressed()
-                if mouseclick[0]:
-                    if self.start_button.check_click(pygame.mouse.get_pos()):
-                        self.GAME_STATE = self._game_running
-                        self.state_change = True
 
             case self._game_running:
                 if self.state_change:
                     pygame.mouse.set_visible(False)
                     self.state_change = False
+                # TODO: Thoughts
+                # Should this be an event? Currently works like an event, but it would add more complexity to my
+                # already messy update
+                # although, it would let me hit p again to unpause (or escape?) which I like.
+                # Plan for after the bullet upgrades commit
                 if pressed_keys[K_p]:
                     self.GAME_STATE = self._game_paused
                     self.state_change = True
                 self.player.update(pressed_keys)
                 # need proper enemy factory but rn just want consistency for testing
-                if self.score >= self.level * 10:
+                if self.score >= self.level * (10 + self.level):
                     self.enemy_rate += 0.5
                     self.level += 1
                 if self.enemy_timer <= 0:
@@ -105,16 +149,6 @@ class Game(pygame.sprite.Sprite):
                     self.restart_button.set_center(self._game_width / 2, self._game_height / 2)
                     self.quit_button.set_center(self._game_width / 2, self._game_height / 2 + 95)
                     self.state_change = False
-                mouseclick = pygame.mouse.get_pressed()
-                if mouseclick[0]:
-                    if self.resume_button.check_click(pygame.mouse.get_pos()):
-                        self.GAME_STATE = self._game_running
-                        self.state_change = True
-                    if self.restart_button.check_click(pygame.mouse.get_pos()):
-                        self.reset_game()
-                    if self.quit_button.check_click(pygame.mouse.get_pos()):
-                        self.GAME_STATE = self._game_close
-                        self.state_change = True
 
             case self._game_end:
                 if self.state_change:
@@ -122,13 +156,6 @@ class Game(pygame.sprite.Sprite):
                     self.restart_button.set_center(self._game_width / 2, self._game_height / 2 - 60)
                     self.quit_button.set_center(self._game_width / 2, self._game_height / 2 + 60)
                     self.state_change = False
-                mouseclick = pygame.mouse.get_pressed()
-                if mouseclick[0]:
-                    if self.restart_button.check_click(pygame.mouse.get_pos()):
-                        self.reset_game()
-                    if self.quit_button.check_click(pygame.mouse.get_pos()):
-                        self.GAME_STATE = self._game_close
-                        self.state_change = True
 
             case self._game_close:
                 print("Game State set to Close")
@@ -197,10 +224,6 @@ _game = Game(SCREEN_WIDTH, SCREEN_HEIGHT)
 # Game State - start, running, paused, finished, and closed. Closed will end the game loop
 # Game menu - start menu, pause menu (resume, quit, or restart), finish menu (quit or restart)
 while _game.run():
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            _game.set_game_close()
-
     _game.update()
     screen.fill("blue")
     _game.draw(screen)
