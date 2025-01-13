@@ -63,7 +63,7 @@ class Game(pygame.sprite.Sprite):
         pygame.draw.rect(surface, "grey", self.header)
         surface.blit(self.scoreboard, self.scoreboard_rect)
         surface.blit(self.level_board, self.level_rect)
-        self.player.draw_bullet_count(surface)
+        self.player.draw_player_header(surface)
         # Based on game state - draw surfaces overtop the above
         match self.GAME_STATE:
             case self._game_start:

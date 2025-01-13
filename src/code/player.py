@@ -27,14 +27,20 @@ class Player(pygame.sprite.Sprite):
         self.shot = 0
         self.reload = 1
         self.reset = 2
+        self.money = 0
+        self.money_location = (20, 35)
+        self.money_board = self.font.render("Money: {}".format(str(self.money)), True, "black")
+        self.money_rect = self.money_board.get_rect(topleft=self.money_location)
+        self.enemy_value = 10
 
     def draw(self, surface):
         surface.blit(self.draw_arm, self.draw_arm_rectangle)
         surface.blit(self.draw_body, self.draw_body_rectangle)
         self.bullet_group.draw(surface)
 
-    def draw_bullet_count(self, surface):
+    def draw_player_header(self, surface):
         surface.blit(self.bullet_board, self.bullet_rect)
+        surface.blit(self.money_board, self.money_rect)
 
     def update(self, pressed):
         # want to use match - case here but need to learn more about pressed first
@@ -58,6 +64,7 @@ class Player(pygame.sprite.Sprite):
         # Worth considering a redesign where all classes have access to the game, and game functions, directly
         if pygame.sprite.groupcollide(self.bullet_group, self.game.get_enemy_group(), True, True, pygame.sprite.collide_mask):
             self.game.update_scoreboard(0)
+            self.update_money(self.enemy_value)
 
     def update_bullet_count(self, update):
         match update:
@@ -70,6 +77,11 @@ class Player(pygame.sprite.Sprite):
         self.bullet_board = self.font.render("Bullets: {}".format(str(self.bullets)), True, "black")
         self.bullet_rect = self.bullet_board.get_rect(topleft=self.bullet_location)
 
+    def update_money(self, update):
+        self.money += update
+        self.money_board = self.font.render("Money: {}".format(str(self.money)), True, "black")
+        self.money_rect = self.money_board.get_rect(topleft=self.money_location)
+
     def reset_game(self):
         self.bullet_group.empty()
         self.arm_angle = 0
@@ -77,3 +89,4 @@ class Player(pygame.sprite.Sprite):
         self.draw_arm = self.tank_arm
         self.draw_arm_rectangle = self.arm_rect
         self.update_bullet_count(self.reset)
+        self.update_money(-self.money)
