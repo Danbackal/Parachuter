@@ -21,15 +21,16 @@ class Player(pygame.sprite.Sprite):
         self.bullet_group = pygame.sprite.Group()
         self.bullet_timer = 0
         self.bullets = 100
-        self.bullet_location = (20, 10)
-        self.bullet_board = self.font.render("Bullets: {}".format(str(self.bullets)), True, "black")
+        self.bullet_location = (45, 10)
+        self.bullet_board = self.font.render(str(self.bullets), True, "black")
         self.bullet_rect = self.bullet_board.get_rect(topleft=self.bullet_location)
+        self.bullet_price = 100
         self.shot = 0
         self.reload = 1
         self.reset = 2
         self.money = 0
-        self.money_location = (20, 35)
-        self.money_board = self.font.render("Money: {}".format(str(self.money)), True, "black")
+        self.money_location = (45, 35)
+        self.money_board = self.font.render(str(self.money), True, "black")
         self.money_rect = self.money_board.get_rect(topleft=self.money_location)
         self.enemy_value = 10
 
@@ -71,16 +72,22 @@ class Player(pygame.sprite.Sprite):
             case self.shot:
                 self.bullets -= 1
             case self.reload:
-                self.bullets += 100
+                if self.money > self.bullet_price:
+                    self.money -= self.bullet_price
+                    self.money_board = self.font.render(str(self.money), True, "black")
+                    self.bullets += 100
             case self.reset:
                 self.bullets = 100
-        self.bullet_board = self.font.render("Bullets: {}".format(str(self.bullets)), True, "black")
+        self.bullet_board = self.font.render(str(self.bullets), True, "black")
         self.bullet_rect = self.bullet_board.get_rect(topleft=self.bullet_location)
 
     def update_money(self, update):
         self.money += update
-        self.money_board = self.font.render("Money: {}".format(str(self.money)), True, "black")
+        self.money_board = self.font.render(str(self.money), True, "black")
         self.money_rect = self.money_board.get_rect(topleft=self.money_location)
+
+    def get_bullet_price(self):
+        return self.bullet_price
 
     def reset_game(self):
         self.bullet_group.empty()

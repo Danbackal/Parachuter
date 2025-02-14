@@ -5,6 +5,7 @@ import os
 from player import Player
 from enemy import Enemy
 from button import Button
+from pause_menu import PauseMenu
 
 
 class Game(pygame.sprite.Sprite):
@@ -24,6 +25,7 @@ class Game(pygame.sprite.Sprite):
         self.GAME_STATE = self._game_start
         self.ground = pygame.Rect(0, 830, self._game_width, 130)
         self.paused = False
+        self.image_path = "resources/images/"
 
         # Button Set Up
         self.start_button = Button(self, "start")
@@ -32,9 +34,13 @@ class Game(pygame.sprite.Sprite):
         self.restart_button = Button(self, "restart")
         self.quit_button = Button(self, "quit")
         self.state_change = False
-        self.pause_menu_background = pygame.Surface((self._game_width, self._game_height))
-        self.pause_menu_background.set_alpha(135)
-        self.pause_menu_background.fill("grey")
+
+        self.bullet_location = (30, 8)
+        self.bullet = pygame.image.load(self.image_path + "bullet.png")
+        self.bullet_rect = self.bullet.get_rect(midtop=self.bullet_location)
+        self.coin_location = (28, 35)
+        self.coin = pygame.image.load(self.image_path + "coin.png")
+        self.coin_rect = self.coin.get_rect(midtop=self.coin_location)
 
         # Header Set Up
         self.main_font = pygame.font.Font(None, 32)
@@ -54,6 +60,9 @@ class Game(pygame.sprite.Sprite):
         self.enemy_timer = 0
         self.enemy_rate = 1
 
+        # Pause Menu
+        self.pause_menu = PauseMenu(self)
+
     # TODO: Break up draw function into parts of screen
     def draw(self, surface):
         # surface.blit(self.ground, self.rect)
@@ -63,16 +72,16 @@ class Game(pygame.sprite.Sprite):
         pygame.draw.rect(surface, "grey", self.header)
         surface.blit(self.scoreboard, self.scoreboard_rect)
         surface.blit(self.level_board, self.level_rect)
+        surface.blit(self.bullet, self.bullet_rect)
+        surface.blit(self.coin, self.coin_rect)
         self.player.draw_player_header(surface)
         # Based on game state - draw surfaces overtop the above
         match self.GAME_STATE:
             case self._game_start:
                 self.start_button.draw(surface)
             case self._game_paused:
-                surface.blit(self.pause_menu_background, (0, 0))
-                self.resume_button.draw(surface)
-                self.restart_button.draw(surface)
-                self.quit_button.draw(surface)
+                # Need game_paused menu and game_paused upgrade menu
+                self.pause_menu.draw(surface)
             case self._game_end:
                 self.restart_button.draw(surface)
                 self.quit_button.draw(surface)
@@ -106,14 +115,17 @@ class Game(pygame.sprite.Sprite):
                                     self.GAME_STATE = self._game_running
                                     self.state_change = True
                             case self._game_paused:
-                                if self.resume_button.check_click(mouse_pos):
+                                if self.pause_menu.get_button("resume").check_click(mouse_pos):
                                     self.GAME_STATE = self._game_running
                                     self.state_change = True
-                                if self.restart_button.check_click(mouse_pos):
+                                if self.pause_menu.get_button("restart").check_click(mouse_pos):
                                     self.reset_game()
-                                if self.quit_button.check_click(mouse_pos):
+                                if self.pause_menu.get_button("quit").check_click(mouse_pos):
                                     self.GAME_STATE = self._game_close
                                     self.state_change = True
+                                # Upgrade buttons
+                                if self.pause_menu.get_button("reload").check_click(mouse_pos):
+                                    self.player.update_bullet_count(1)
                                 # TODO: add upgrade button clicks.
                                 # Will maybe need a method or class for upgrades:
                                 # Can display all at once, show newer versions and unlocks
@@ -163,8 +175,12 @@ class Game(pygame.sprite.Sprite):
                 if self.state_change:
                     pygame.mouse.set_visible(True)
                     self.resume_button.set_center(self._game_width / 2, self._game_height / 2 - 95)
+                    self.resume_button.resize(1)
                     self.restart_button.set_center(self._game_width / 2, self._game_height / 2)
+                    self.restart_button.resize(1)
                     self.quit_button.set_center(self._game_width / 2, self._game_height / 2 + 95)
+                    self.quit_button.resize(1)
+
                     self.state_change = False
 
             case self._game_end:
@@ -195,6 +211,9 @@ class Game(pygame.sprite.Sprite):
 
     def get_enemy_group(self):
         return self.enemy_group
+
+    def get_player(self):
+        return self.player
 
     def get_game_state(self):
         return self.GAME_STATE

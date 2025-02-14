@@ -16,6 +16,8 @@ class Button(pygame.sprite.Sprite):
                 button_path = button_path + "restart_button.png"
             case "quit":
                 button_path = button_path + "quit_button.png"
+            case "empty":
+                button_path = button_path + "base_button.png"
         self.image = pygame.image.load(button_path)
         self.rect = self.image.get_rect()
 
@@ -27,3 +29,10 @@ class Button(pygame.sprite.Sprite):
 
     def check_click(self, mouse):
         return self.rect.collidepoint(mouse)
+
+    def resize(self, size):
+        self.image = pygame.transform.scale_by(self.image, size)
+
+    def get_center(self):
+        return self.rect.center
+
